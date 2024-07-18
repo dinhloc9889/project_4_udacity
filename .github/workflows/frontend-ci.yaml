@@ -1,4 +1,4 @@
-name: CD workflow for frontend application
+name: CI workflow for frontend application
 
 on:
   workflow_dispatch:
