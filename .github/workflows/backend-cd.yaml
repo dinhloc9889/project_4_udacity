@@ -9,8 +9,7 @@ on:
       - "starter/backend/**"
 
 jobs:
-  lint:
-    name: backend lint job
+  Lint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -18,14 +17,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Cache pipenv dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pipenv
-          key: pipenv-${{ runner.os }}-${{ hashFiles('**/Pipfile.lock') }}
-          restore-keys: |
-            pipenv-${{ runner.os }}-
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -40,3 +31,26 @@ jobs:
 
       - name: run lint
         run: pipenv run lint
+  
+  Test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./starter/backend
+    steps:
+    - name: Check the Repository
+      uses: actions/checkout@v3
+
+    - name: Use Python 3
+      uses:  actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: pip install pipenv
+      run: pip install pipenv
+
+    - name: pipenv install dependencies
+      run: pipenv install
+
+    - name: Test
+      run: pipenv run test
