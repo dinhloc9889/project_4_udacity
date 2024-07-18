@@ -66,6 +66,17 @@ jobs:
     - name: Check the Repository
       uses: actions/checkout@v3
 
+        - name: Use Python 3
+      uses:  actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: pip install pipenv
+      run: pip install pipenv
+
+    - name: pipenv install dependencies
+      run: pipenv install
+
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
