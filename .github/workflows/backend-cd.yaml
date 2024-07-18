@@ -108,4 +108,4 @@ jobs:
       working-directory: ./starter/backend/k8s
       run: |
         kustomize edit set image backend=204215116418.dkr.ecr.us-east-1.amazonaws.com/backend:latest
-        kustomize build | kubectl apply -f 
+        kustomize build | kubectl apply -f -
