@@ -31,76 +31,70 @@ jobs:
       - name: Checkout Run Lint
         run: npm run lint
   
-  # Test:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./starter/backend
-  #   steps:
-  #   - name: Check the Repository
-  #     uses: actions/checkout@v3
+  Test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./starter/frontend
+    steps:
+      - name: Checkout code
+          uses: actions/checkout@v3
 
-  #   - name: Use Python 3
-  #     uses:  actions/setup-python@v4
-  #     with:
-  #       python-version: "3.11"
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
 
-  #   - name: pip install pipenv
-  #     run: pip install pipenv
+      - name: Install Dependencies
+        run: npm install
 
-  #   - name: pipenv install dependencies
-  #     run: pipenv install
+      - name: Checkout Run Lint
+        run: npm run test
 
-  #   - name: Test
-  #     run: pipenv run test
+  Build:
+    needs: [Test]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./starter/frontend
 
-  # Build:
-  #   needs: [Test]
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./starter/backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #   steps:
-  #   - name: Checkout the Repository
-  #     uses: actions/checkout@v3
-      
-  #   - name: Use Python 3
-  #     uses:  actions/setup-python@v4
-  #     with:
-  #       python-version: "3.11"
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: starter/frontend/package-lock.json
 
-  #   - name: pip install pipenv
-  #     run: pip install pipenv
+      - name: Install Dependencies
+        run: npm install
 
-  #   - name: pipenv install dependencies
-  #     run: pipenv install
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          
+      - name: Login to ecr
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Build and Push Docker Image
+        run: |
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 204215116418.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
+          docker push 204215116418.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+      - name: Update k8s
+        run:
+        aws eks update-kubeconfig --name cluster --region us-east-1
 
-  #   - name: Configure AWS Credentials
-  #     uses: aws-actions/configure-aws-credentials@v2
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       aws-region: us-east-1
-        
-  #   - name: Login to ecr
-  #     id: login-ecr
-  #     uses: aws-actions/amazon-ecr-login@v2
-
-  #   - name: Build and Push Docker Image
-  #     env:
-  #       IMAGE_TAG: latest
-  #       REPO_NAME: backend
-  #     run: |
-  #       docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 204215116418.dkr.ecr.us-east-1.amazonaws.com/backend:latest .
-  #       docker push 204215116418.dkr.ecr.us-east-1.amazonaws.com/backend:latest
-  #   - name: Update k8s
-  #     run:
-  #      aws eks update-kubeconfig --name cluster --region us-east-1
-
-  #   - name: Deploy Docker Image to Amazon EKS
-  #     working-directory: ./starter/backend/k8s
-  #     run: |
-  #       kustomize edit set image backend=204215116418.dkr.ecr.us-east-1.amazonaws.com/backend:latest
-  #       kustomize build | kubectl apply -f -
+      - name: Deploy Docker Image to Amazon EKS
+        working-directory: ./starter/frontend/k8s
+        run: |
+          kustomize edit set image frontend=204215116418.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+          kustomize build | kubectl apply -f -
