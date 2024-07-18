@@ -98,7 +98,7 @@ jobs:
         docker push 204215116418.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
 
     - name: Run init.sh
-        run: cd ./setup && ./init.sh || true
+      run: cd ./setup && ./init.sh || true
 
     - name: Update k8s
       run:
