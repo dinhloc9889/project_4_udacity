@@ -97,16 +97,14 @@ jobs:
         docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 204215116418.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG .
         docker push 204215116418.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
     
-    - name: Update Kubeconfig
+    - name: Update k8s
       run:
-       aws eks update-kubeconfig --name project_4_udacity --region us-east-1
+       aws eks update-kubeconfig --name cluster --region us-east-1
 
     - name: Deploy Docker Image to Amazon EKS
-      working-directory: starter/backend/k8s
       env:
         IMAGE_TAG: latest
         REPO_NAME: backend
       run: |
-        aws eks update-kubeconfig --name project_4_udacity --region us-east-1
         kustomize edit set image backend=204215116418.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
-        kustomize build | kubectl apply -f -
+        kustomize build | kubectl apply -f 
