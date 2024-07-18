@@ -38,7 +38,7 @@ jobs:
         working-directory: ./starter/frontend
     steps:
       - name: Checkout code
-          uses: actions/checkout@v3
+        uses: actions/checkout@v3
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
@@ -90,8 +90,7 @@ jobs:
           docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 204215116418.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
           docker push 204215116418.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
       - name: Update k8s
-        run:
-        aws eks update-kubeconfig --name cluster --region us-east-1
+        run: aws eks update-kubeconfig --name cluster --region us-east-1
 
       - name: Deploy Docker Image to Amazon EKS
         working-directory: ./starter/frontend/k8s
