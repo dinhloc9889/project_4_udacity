@@ -56,7 +56,7 @@ jobs:
       run: pipenv run test
 
   Build:
-    needs: [Test]
+    needs: [Lint,Test]
     runs-on: ubuntu-latest
     defaults:
       run:
