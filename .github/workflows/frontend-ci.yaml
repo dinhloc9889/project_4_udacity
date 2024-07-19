@@ -76,4 +76,4 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 204215116418.dkr.ecr.us-east-1.amazonaws.com/frontend:latest .
+          docker build .
